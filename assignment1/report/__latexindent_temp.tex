@@ -1,0 +1,48 @@
+\documentclass[12pt]{article}
+
+\usepackage[letterpaper, hmargin=0.75in, vmargin=0.75in]{geometry}
+\usepackage{float}
+
+\pagestyle{empty}
+
+\title{ECE 459: Programming for Performance\\Assignment 1}
+\author{Jack Erickson}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Sudoku Solver}
+
+The sudoku solver uses a recursive brute force method to solve input puzzles. Every cell of the puzzle is iterated through until an empty cell is found. Each value between one and nine inclusive is tested to see if that value will fit in that square based on the current known values in it's row, column, and square. For each of these possible values, the value is inserted into the puzzle and the function calls itself again. If no value can be found for a certain cell, it is assumed there is an issue with a value guessed earlier so false is propogated back up the call chain until a layer is able to try a different value. Eventually a solution will be found where there are no more empty spaces and the function returns true back up the recursion.\\
+This solution is not very optimized and could be improved. For example, if we take an initial pass at the puzzle we can store possible values for each empty cell. Then we can start by guessing squares withthe least number of possible values with the same recursive method. This can drastically reduce the number of iterations required. If we order the possible choices randomly as well, the likelihood the  number is correct is increased with smaller possible choices, this means we have the highest probablility of guessing correctly sooner, and these clues can help reduce possibe values for other squares as well. 
+
+\section{Nonblocking I/O}
+
+The conversion to the multi library resulted in a noticeable improvement to the time to run the verifier. (See Table 1) 
+mispelled 
+
+\begin{table}[ht]
+\centering
+
+\caption{Benchmark resutls for Sudoku verifier on 100 puzzles.}
+\begin{tabular}[t]{|c|c|c|} \hline
+Concurrent Connections & Runtime Average (s) & Time to verify 1 puzzle (ms) \\ \hline
+ 	1	&	26.203	&	262 \\ \hline	
+	3	&	6.581		& 	199 \\ \hline
+	4	&	4.877		& 	195\\ \hline
+	16	&	1.451		& 	232\\ \hline
+	32	&	1.026		& 	328 \\ \hline
+\end{tabular}
+\label{tab:caption}
+\end{table}%
+
+\raggedright
+
+
+Increasing the Number of available connections to N connections should speed up the runtime by a factor of N. The results of the benchmark reflect more improvement on performance, than expected.Which suggests that by preventing any one connection from blocking indefinitely the verifier can continue working on other connections while another finishes. Furthermore, the time taken to verify a puzzle seems to decrease up until 4 concurrent connections, at which point it starts increasing again indicating diminishing returns for multi threading. I can't say for certain why this is the case, but I believe this may be due to the bottleneck shifting from network latency to the overhead in curl multi. Although multi is non-blocking, it isn't multi threaded. From my testing it would seem beyond 4 connections the internal overhead is non-trivial and to improve performance linearly, should be converted to a multi-threaded model.
+
+
+\end{document}
+
